@@ -94,11 +94,9 @@ exports.loginUser = async (req, res, next) => {
   try {
     [result] = await connection.query(query, data);
     [rows] = await connection.query(qur);
-<<<<<<< HEAD
-    res.status(200).json({ success: true, token: token , items: rows});
-=======
+
     res.status(200).json({ success: true, token: token, items: rows });
->>>>>>> e5d12b7a56088c0dfc17f6bf56d5eb13ebe09882
+
   } catch (e) {
     res.status(500).json();
   }
