@@ -72,7 +72,7 @@ exports.loginUser = async (req, res, next) => {
 
   let query = "select * from market_user where email = ? ";
   let data = [email];
-
+  
   let user_id;
   try {
     [rows] = await connection.query(query, data);
@@ -90,9 +90,11 @@ exports.loginUser = async (req, res, next) => {
   const token = jwt.sign({ user_id: user_id }, process.env.ACCESS_TOKEN_SECRET);
   query = "insert into market_token (token, user_id) values (?, ?)";
   data = [token, user_id];
+  let qur = `select nickname from market_user where email = "${email}"`;
   try {
     [result] = await connection.query(query, data);
-    res.status(200).json({ success: true, token: token });
+    [rows] = await connection.query(qur);
+    res.status(200).json({ success: true, token: token , items: rows});
   } catch (e) {
     res.status(500).json();
   }
