@@ -120,3 +120,5 @@ exports.logout = async (req, res, next) => {
     res.status(500).json({error : e});
   }
 };
+
+// @desc 회원탈퇴
