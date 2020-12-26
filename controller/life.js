@@ -20,7 +20,7 @@ exports.LifeUpload = async (req, res, next) => {
         return;
     }
 
-    let query = `insert into neighbor_life (title, content, useSr_id) values (
+    let query = `insert into neighbor_life (title, content, user_id) values (
         "${title}", "${content}",${user_id})`;
     console.log(query);
     try {
@@ -136,3 +136,5 @@ exports.deleteFavorite = async (req, res, next) => {
       res.status(500).json({success : false , message:"즐겨찾기 추가가 안되어있습니다."});
     }
   };
+
+
