@@ -161,8 +161,33 @@ exports.deleteBoard = async (req, res, next) => {
   // }
   
 };
-  
 
+// @desc 동네 글 수정하기
+// @route GET /api/v1/life/title
+// @request order
+// @response success, items
+
+exports.getTitlelist = async (req, res, next) => {
+  let title = req.query.title;
+  let order = req.query.order;
+
+  let query = `select l.*,u.nickname from neighbor_life as l left join market_user as u on l.user_id = u.id 
+               where l.title like '%${title}%' order by created_at ${order}`
+               
+  console.log(query);
+
+  try {
+      [rows] = await connection.query(query);
+      res
+          .status(200)
+          .json({success: true, items: rows, cnt: rows.length});
+  } catch (e) {
+      console.log(e);
+      res
+          .status(400)
+          .json({success: false});
+  }
+};
   
 // @desc   즐겨찾기 게시글 추가
 // @route   POST /api/v1/life/favorite
