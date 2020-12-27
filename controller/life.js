@@ -73,6 +73,97 @@ exports.getLifelist = async (req, res, next) => {
     }
 };
 
+// @desc 글 수정하기
+// @route POST /api/v1/life/update
+// @request life_id, title, content
+// @response success, items
+
+exports.updateBoard = async (req, res, next) => {
+  let life_id = req.body.life_id;
+  let user_id = req.user.id;
+  let title = req.body.title;
+  let content = req.body.content;
+
+  let query = `select * from neighbor_life where id = ${life_id}`;
+  console.log(query);
+  
+  try {
+    [rows] = await connection.query(query);
+    // 다른사람이 쓴 글을, 이 사람이 바꾸려고 하면, 401로 보낸다.
+    if (rows[0].user_id != user_id) {
+      res.status(401).json({ message: "자신의 아이디가 아닙니다." });
+      return;
+    }
+  } catch (e) {
+    res.status(500).json({ message: "위치 확인" });
+    return;
+  }
+
+  query = `update neighbor_life set content = "${content}" , title = "${title}" where id = ${life_id}`;
+
+  let qur = `select u.nickname ,l.* from neighbor_life as l join market_user as u on l.user_id = u.id where l.id = ${life_id}`;
+
+  try {
+    [result] = await connection.query(query);
+    [rows] = await connection.query(qur);
+    res
+      .status(200)
+      .json({ success: true, message: "수정되었습니다.", items: rows });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e });
+    return;
+  }
+};
+
+// @desc    동네 게시글 삭제하기
+// @route   Delete /api/v1/life/delete
+// @request life_id,  user_id
+// @response success, items
+
+exports.deleteBoard = async (req, res, next) => {
+  let user_id = req.user.id;
+  let life_id = req.body.life_id;
+
+  // 해당 유저의 게시글이 맞는지 체크
+  let query = `select * from neighbor_life where id = ${life_id}`;
+
+  try {
+    [rows] = await connection.query(query);
+    if (rows[0].user_id != user_id) {
+      res.status(401).json({ message: "자신의 아이디가 아닙니다." });
+      return;
+    }
+  } catch (e) {
+    res.status(500).json({ message: "위치 확인" });
+    return;
+  }
+
+  let boardquery = `delete from neighbor_life where id = ${life_id}`;
+
+  try {
+    [result] = await connection.query(boardquery);
+    res.status(200).json({ success: true, message: "삭제되었습니다" });
+    console.log(boardquery)
+  } catch (e) {
+    res.status(500).json();
+    return;
+  }
+  // let commentquery = `delete from p_comment where board_id =  ${board_id}`
+  
+  // try {
+  //   [result] = await connection.query(commentquery);
+  //   console.log(commentquery)
+  //   res.status(200).json({ success: true, message: "삭제되었습니다" });
+  //   return;
+  // } catch (e) {
+  //   res.status(500).json();
+  //   return;
+  // }
+  
+};
+  
+
+  
 // @desc   즐겨찾기 게시글 추가
 // @route   POST /api/v1/life/favorite
 // @request life_id, user_id(auth)
