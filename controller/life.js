@@ -73,7 +73,7 @@ exports.getLifelist = async (req, res, next) => {
     }
 };
 
-// @desc 글 수정하기
+// @desc 동네 글 수정하기
 // @route POST /api/v1/life/update
 // @request life_id, title, content
 // @response success, items
