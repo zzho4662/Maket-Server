@@ -7,6 +7,7 @@ const path = require("path");
 const users = require("./routes/users");
 const posts = require("./routes/posts");
 const life = require("./routes/life");
+const favorite = require("./routes/favorite");
 // const follows = require("./routes/follows");
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/v1/users", users);
 app.use("/api/v1/posts", posts);
 app.use("/api/v1/life", life);
+app.use("/api/v1/favorite",favorite);
 // app.use("/api/v1/follows", follows);
 
 const PORT = process.env.PORT || 6200;

@@ -73,6 +73,26 @@ exports.getLifelist = async (req, res, next) => {
     }
 };
 
+// @desc 동네 글 상세보기
+// @route POST /api/v1/life/detail
+// @request life_id,
+// @response success, items
+
+exports.detailBoard = async(req,res,next) =>{
+  let life_id = req.body.life_id;
+
+  let query = `select l.*,u.nickname from neighbor_life as l join market_user as u on l.user_id = u.id where l.id = ${life_id}`;
+
+  try {
+    [rows] = await connection.query(query);
+    res.status(200).json({items:rows });
+    return;
+  } catch (e) {
+    res.status(500).json();
+    return;
+  }
+};
+
 // @desc 동네 글 수정하기
 // @route POST /api/v1/life/update
 // @request life_id, title, content
@@ -148,23 +168,22 @@ exports.deleteBoard = async (req, res, next) => {
     res.status(500).json();
     return;
   }
-  // let commentquery = `delete from p_comment where board_id =  ${board_id}`
+  let commentquery = `delete from life_comment where life_id =  ${life_id}`
   
-  // try {
-  //   [result] = await connection.query(commentquery);
-  //   console.log(commentquery)
-  //   res.status(200).json({ success: true, message: "삭제되었습니다" });
-  //   return;
-  // } catch (e) {
-  //   res.status(500).json();
-  //   return;
-  // }
+  try {
+    [result] = await connection.query(commentquery);
+    console.log(commentquery)
+    res.status(200).json({ success: true, message: "삭제되었습니다" });
+  } catch (e) {
+    res.status(500).json();
+    return;
+  }
   
 };
 
-// @desc 동네 글 수정하기
+// @desc 동네 글 주제별로 보여주기
 // @route GET /api/v1/life/title
-// @request order
+// @request order, title
 // @response success, items
 
 exports.getTitlelist = async (req, res, next) => {
@@ -188,69 +207,187 @@ exports.getTitlelist = async (req, res, next) => {
           .json({success: false});
   }
 };
-  
-// @desc   즐겨찾기 게시글 추가
-// @route   POST /api/v1/life/favorite
-// @request life_id, user_id(auth)
+
+// @desc 동네 글 검색하기
+// @route GET /api/v1/life/search
+// @request keyword
 // @response success, items
 
-exports.addFavorite = async (req, res, next) => {
-    // 즐겨찾기에 이미 추가된 게시글은, 즐겨찾기에 추가되지 않도록 한다.
-    let life_id = req.body.life_id;
-    let user_id = req.user.id;
+exports.searchLife = async(req,res,next) =>{
+  let keyword = req.body.keyword;
 
-    if (!life_id) {
-        res.status(400).json();
-        return;
-      }
+let query = `select l.*,u.nickname,u.location from neighbor_life as l left join market_user as u on l.user_id = u.id 
+               where l.title like '%${keyword}%' or l.content like '%${keyword}%' order by created_at desc`
+               
+  console.log(query);
 
-    let query = `insert into life_like (life_id, user_id) values (${life_id} , ${user_id})`;
-    let qur = `select l.*,(select count(*) from life_like where life_id = ${life_id})as favorite_cnt from neighbor_life as l 
-               join life_like as f on l.id = f.life_id where l.id = ${life_id} limit 1;`;
-
-    
-    try {
-        [result] = await connection.query(query);
-        [rows] = await connection.query(qur);
-        res
-            .status(200)
-            .json({success: true, items:rows});
-    } catch (e) {
-        if (e.errno == 1062) {
-            res
-                .status(401)
-                .json({message: "이미 즐겨찾기에 추가되었습니다."});
-        } else {
-            res
-                .status(500)
-                .json({error: e});
-        }
-    }
+  try {
+      [rows] = await connection.query(query);
+      res
+          .status(200)
+          .json({success: true, items: rows, cnt: rows.length});
+  } catch (e) {
+      console.log(e);
+      res
+          .status(400)
+          .json({success: false});
+  }
 };
 
-// @desc    즐겨찾기 삭제
-// @route   DELETE  /api/v1/life/favorite
-// @request  life_id, user_id(auth)
+
+// @desc 동네 글 댓글 보기
+// @route GET /api/v1/life/comment
+// @request life_id
 // @response success, items
 
-exports.deleteFavorite = async (req, res, next) => {
-    let life_id = req.body.life_id;
-    let user_id = req.user.id
+exports.getComment = async (req, res, next) => {
+  let life_id = req.body.life_id;
+
+  let query = `select c.*,u.nickname from life_comment as c left join market_user as u on c.user_id = u.id 
+               where life_id = ${life_id} order by created_at`;
+  console.log(query);
+
+  try {
+      [rows] = await connection.query(query);
+      res
+          .status(200)
+          .json({success: true, items: rows, cnt: rows.length});
+  } catch (e) {
+      console.log(e);
+      res
+          .status(400)
+          .json({success: false});
+  }
+};
+
+// @desc 동네 글 댓글달기
+// @route POST /api/v1/life/comment
+// @request user_id(auth), life_id, comment
+// @response success, items
+exports.addComment = async (req, res, next) => {
+  let user_id = req.user.id;
+  let life_id = req.body.life_id;
+  let comment = req.body.comment;
+
+  let query = `insert into life_comment (life_id, comment, user_id) values (
+    ${life_id}, "${comment}",${user_id})`;
+  console.log(query);
   
-    if (!life_id) {
-      res.status(400).json();
+  let qur = `select u.nickname,u.location ,c.* from life_comment as c left join market_user as u on c.user_id = u.id 
+             where life_id = ${life_id} order by created_at asc`;
+  console.log(qur);
+  try {
+      [result] = await connection.query(query);
+      [rows] = await connection.query(qur);
+      res.status(200).json({ success: true, items: rows, cnt: rows.length });
+      } catch (e) {
+      res.status(500).json({ error: e });
+      }
+};
+
+
+
+// @desc 동네 글 댓글 수정하기
+// @route POST /api/v1/life/upcomment
+// @request user_id(auth), life_id, comment,id
+// @response success, items
+exports.updateComment = async (req, res, next) => {
+  let user_id = req.user.id;
+  let id = req.body.id;
+  let comment = req.body.comment;
+  let life_id = req.body.life_id;
+
+  let query = `select * from life_comment where id = ${id}`;
+  try {
+    [rows] = await connection.query(query);
+    if (rows[0].user_id != user_id) {
+      res.status(401).json({ message: "자신의 아이디가 아닙니다." });
       return;
     }
-  
-    let query = `delete from life_like where life_id = ${life_id} and user_id = ${user_id}`;
+  } catch (e) {
+    res.status(500).json({ message: "여기인거같은데" });
+    return;
+  }
+
+  query = `update life_comment set comment = "${comment}"  where id = ${id}`;
+  let qur = `select u.nickname,u.location ,c.* from life_comment as c left join market_user as u on c.user_id = u.id 
+             where life_id = ${life_id} order by created_at asc  `;
+  console.log(query);
+
+  try {
+    [result] = await connection.query(query);
+    [rows] = await connection.query(qur);
+    res
+      .status(200)
+      .json({ success: true, message: "수정되었습니다.", items: rows });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e });
+    return;
+  }
+};
+
+
+// @desc 동네 글 댓글 삭제하기
+// @route POST /api/v1/life/delcomment
+// @request user_id(auth), life_id
+// @response success, items
+exports.deleteComment = async (req, res, next) => {
+  let user_id = req.user.id;
+  let id = req.body.id;
+  let life_id = req.body.life_id;
+
+  let query = `select * from life_comment where id = ${id}`;
+  try {
+    [rows] = await connection.query(query);
+    if (rows[0].user_id != user_id) {
+      res.status(401).json({ message: "자신의 아이디가 아닙니다." });
+      return;
+    }
+  } catch (e) {
+    res.status(500).json({ message: "여기인거같은데" });
+    return;
+  }
+
+  query = `delete from life_comment where id = ${id} and life_id = ${life_id}`;
+  console.log(query);
+  let qur = `select u.nickname,u.location ,c.* from life_comment as c left join market_user as u on c.user_id = u.id 
+             where life_id = ${life_id} order by created_at asc  `;
+
+  try {
+    [result] = await connection.query(query);
+    [rows] = await connection.query(qur);
+    res
+      .status(200)
+      .json({ success: true, message: "수정되었습니다.", items: rows, cnt:rows.length });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e });
+    return;
+  }
+};
+
+
+// @desc 동네 글 댓글에 댓글달기
+// @route POST /api/v1/life/comment/upcomment
+// @request user_id(auth), life_id,id,comment
+// @response success, items
+
+exports.upupComment = async(req,res,next) =>{
+    let user_id = req.user.id;
+    let comment_id= req.body.comment_id;
+    let life_id = req.body.life_id;
+    let comment = req.body.comment;
+
+    let query = `insert into life_comment (life_id, comment, user_id) values (${life_id}, "${comment}",${user_id})`;
     console.log(query);
   
+    let qur = `select u.nickname,u.location ,c.* from life_comment as c left join market_user as u on c.user_id = u.id 
+             where life_id = ${life_id} order by created_at asc`;
+    console.log(qur);
     try {
-      [result] = await connection.query(query);
-      res.status(200).json({ success: true ,message:"성공"});
+          [result] = await connection.query(query);
+          [rows] = await connection.query(qur);
+          res.status(200).json({ success: true, items: rows, cnt: rows.length });
     } catch (e) {
-      res.status(500).json({success : false , message:"즐겨찾기 추가가 안되어있습니다."});
+          res.status(500).json({ error: e });
     }
-  };
-
-
+}
