@@ -393,3 +393,57 @@ exports.upupComment = async(req,res,next) =>{
           res.status(500).json({ error: e });
     }
 }
+
+// @desc 동네 글 관심목록 추가
+// @route POST /api/v1/life/interest
+// @request user_id(auth), life_id
+// @response success, items
+
+exports.interestLife = async(req,res,next) =>{
+  let user_id = req.user.id;
+  let life_id = req.body.life_id;
+
+  let query = `insert into life_interest (life_id, user_id) values (${life_id} , ${user_id})`;
+  let qur = `select * , (select count(*) from life_interest where user_id = ${user_id} and life_id = ${life_id})as interest_cnt 
+             from neighbor_life where id = ${life_id};`;
+
+  console.log(query);
+  console.log(qur);
+
+  try {
+    [result] = await connection.query(query);
+    [rows] = await connection.query(qur);
+    res.status(200).json({ success: true, items: rows });
+  } catch (e) {
+    if (e.errno == 1062) {
+      res.status(500).json({ message: "이미 즐겨찾기에 추가되었습니다." });
+    } else {
+      res.status(500).json({ error: e });
+    }
+  }
+}
+
+// @desc 동네 글 관심목록 제외
+// @route POST /api/v1/life/interest/delete
+// @request user_id(auth), life_id
+// @response success, items
+
+exports.uninterestLife = async(req,res,next) =>{
+  let user_id = req.user.id;
+  let life_id = req.body.life_id;
+
+  let query = `delete from life_interest where user_id = ${user_id} and life_id = ${life_id}`;
+  let qur = `select * , (select count(*) from life_interest where user_id = ${user_id} and life_id = ${life_id})as interest_cnt 
+             from neighbor_life where id = ${life_id};`;
+
+  console.log(query);
+  console.log(qur);
+
+  try {
+    [result] = await connection.query(query);
+    [rows] = await connection.query(qur);
+    res.status(200).json({ success: true, items: rows });
+  } catch (e) {
+    res.status(500).json({ error: e });
+  }
+}
