@@ -5,7 +5,7 @@ const { LifeUpload, getLifelist, updateBoard, deleteBoard, getTitlelist, searchL
 const router = express.Router();
 
 router.route("/").post(auth, LifeUpload);
-router.route("/").get(getLifelist);
+router.route("/").get(auth,getLifelist);
 router.route("/detail").post(auth,detailBoard)
 router.route("/update").post(auth, updateBoard);
 router.route("/delete").delete(auth,deleteBoard);

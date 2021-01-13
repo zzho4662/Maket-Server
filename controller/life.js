@@ -57,9 +57,9 @@ exports.getLifelist = async (req, res, next) => {
     let order = req.query.order;
     let offset = req.query.offset;
     let limit = req.query.limit;
+    let user_id = req.user.id;
 
-
-    let query = `select l.*,u.nickname, ifnull((select count(life_id) from life_interest where life_id = l.id group by life_id),0) as interest_cnt 
+    let query = `select l.*,u.nickname, ifnull((select count(life_id) from life_interest where life_id = l.id and user_id = ${user_id} group by life_id),0) as interest_cnt 
                  from neighbor_life as l left join market_user as u on l.user_id = u.id 
                  order by created_at ${order} limit ${offset}, ${limit}`;
     console.log(query);
