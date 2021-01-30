@@ -60,6 +60,7 @@ exports.getLifelist = async (req, res, next) => {
     let user_id = req.user.id;
 
     let query = `select l.*,u.nickname, ifnull((select count(life_id) from life_interest where life_id = l.id and user_id = ${user_id} group by life_id),0) as interest_cnt 
+                 ifnull((select count(life_id) from life_comment where life_id = l.id group by life_id),0) as com_cnt
                  from neighbor_life as l left join market_user as u on l.user_id = u.id 
                  order by created_at ${order} limit ${offset}, ${limit}`;
     console.log(query);
@@ -363,7 +364,7 @@ exports.deleteComment = async (req, res, next) => {
     [rows] = await connection.query(qur);
     res
       .status(200)
-      .json({ success: true, message: "수정되었습니다.", items: rows, cnt:rows.length });
+      .json({ success: true, message: "삭제되었습니다.", items: rows, cnt:rows.length });
   } catch (e) {
     res.status(500).json({ success: false, error: e });
     return;
