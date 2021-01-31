@@ -242,7 +242,7 @@ let query = `select l.*,u.nickname,u.location from neighbor_life as l left join 
 
 
 // @desc 동네 글 댓글 보기
-// @route GET /api/v1/life/comment
+// @route POST /api/v1/life/comment
 // @request life_id
 // @response success, items
 
