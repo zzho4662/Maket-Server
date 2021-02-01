@@ -8,6 +8,7 @@ const {query} = require("express");
 // @request life_id, user_id(auth)
 // @response success, items
 
+// test
 exports.addFavorite = async (req, res, next) => {
     // 즐겨찾기에 이미 추가된 게시글은, 즐겨찾기에 추가되지 않도록 한다.
     let life_id = req.body.life_id;
