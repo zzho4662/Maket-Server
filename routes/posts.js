@@ -7,10 +7,12 @@ const {
   getMyPosts,
   getFriendsPost,
   uploadImage,
+  uploadPhoto,
 } = require("../controller/posts");
 
 const router = express.Router();
 
+router.route("/photo").post(auth, uploadPhoto);
 router.route("/image").post(auth, uploadImage);
 router.route("/").post(auth, uploadNew);
 router.route("/").get(auth, getMyPosts);
