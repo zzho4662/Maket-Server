@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.route("/").post(auth, LifeUpload);
 router.route("/").get(auth,getLifelist);
-router.route("/detail").post(auth,detailBoard)
+router.route("/detail").get(auth,detailBoard)
 router.route("/update").post(auth, updateBoard);
 router.route("/delete").delete(auth,deleteBoard);
 router.route("/search").get(searchLife);
