@@ -84,7 +84,7 @@ exports.getLifelist = async (req, res, next) => {
 // @response success, items
 
 exports.detailBoard = async(req,res,next) =>{
-  let life_id = req.body.life_id;
+  let life_id = req.query.life_id;
   let user_id = req.user.id;
 
   let query = `select l.*,u.nickname,(select count(*) from life_interest where life_id = ${life_id} and user_id = ${user_id}) as interest_cnt from neighbor_life as l join market_user as u on l.user_id = u.id where l.id = ${life_id}`;
