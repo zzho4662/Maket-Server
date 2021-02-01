@@ -13,7 +13,7 @@ exports.uploadNew = async (req, res, next) => {
   let price = req.body.price;
   let market_id;
 
-  let image = req.files.image;
+  let photo = req.files.photo;
 
   let query =
     "insert into market (user_id, category, title, content, price) \
@@ -23,7 +23,7 @@ exports.uploadNew = async (req, res, next) => {
 
   let query1 = `select id, user_id from market where user_id = ${user_id} order by created_at desc limit 1`;
 
-  
+  console.log(query1);
    try {
     [result] = await connection.query(query, data);
     [rows] = await connection.query(query1)
@@ -37,29 +37,29 @@ exports.uploadNew = async (req, res, next) => {
   }
 
   // 이미지
-  if (image.mimetype.startsWith("image") == false) {
+  if (photo.mimetype.startsWith("image") == false) {
     res.stats(400).json({ message: "사진 파일 아닙니다." });
     return;
   }
 
-  if (image.size > process.env.MAX_FILE_SIZE) {
+  if (photo.size > process.env.MAX_FILE_SIZE) {
     res.stats(400).json({ message: "파일 크기가 너무 큽니다." });
     return;
   }
 
-  image.name = `image_${user_id}_${Date.now()}${path.parse(image.name).ext}`;
+  photo.name = `photo${user_id}_${Date.now()}${path.parse(photo.name).ext}`;
 
-  let fileUploadPath = `${process.env.FILE_UPLOAD_PATH}/${image.name}`;
+  let fileUploadPath = `${process.env.FILE_UPLOAD_PATH}/${photo.name}`;
 
-  image.mv(fileUploadPath, async (err) => {
+  photo.mv(fileUploadPath, async (err) => {
     if (err) {
       console.log(err);
       return;
     }
   });
 
-  let queryImage = `insert into market_image (image , market_id, user_id) values (${image}, ${market_id}, ${user_id})`;
-
+  let queryImage = `insert into market_image (image , market_id, user_id) values ("${photo.name}", ${market_id}, ${user_id})`;
+  console.log(queryImage);
 try {
     [result] = await connection.query(queryImage);
     res.status(200).json({ success: true });
@@ -282,54 +282,6 @@ exports.getFriendsPost = async (req, res, next) => {
     return;
   } catch (e) {
     res.status(500).json();
-    return;
-  }
-};
-
-//////////////////
-//테스트
-
-// @desc        사진1장과 내용을 업로드 하는 API
-// @route       POST /api/v1/posts
-// @request     photo, content, user_id(auth)
-// @response    success
-exports.uploadPhoto = async (req, res, next) => {
-  let user_id = req.user.id;
-  let photo = req.files.photo;
-  let content = req.body.content;
-
-  if (photo.mimetype.startsWith("image") == false) {
-    res.stats(400).json({ message: "사진 파일 아닙니다." });
-    return;
-  }
-
-  if (photo.size > process.env.MAX_FILE_SIZE) {
-    res.stats(400).json({ message: "파일 크기가 너무 큽니다." });
-    return;
-  }
-
-  photo.name = `photo_${user_id}_${Date.now()}${path.parse(photo.name).ext}`;
-
-  let fileUploadPath = `${process.env.FILE_UPLOAD_PATH}/${photo.name}`;
-
-  photo.mv(fileUploadPath, async (err) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-  });
-
-  let query =
-    "insert into photo_post (user_id, photo_url, content) \
-                values (?,?,?)";
-  let data = [user_id, photo.name, content];
-
-  try {
-    [result] = await connection.query(query, data);
-    res.status(200).json({ success: true });
-    return;
-  } catch (e) {
-    res.status(500).json({ error: e });
     return;
   }
 };
