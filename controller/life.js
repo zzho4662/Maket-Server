@@ -244,12 +244,12 @@ let query = `select l.*,u.nickname,u.location from neighbor_life as l left join 
 
 
 // @desc 동네 글 댓글 보기
-// @route POST /api/v1/life/comment
+// @route GET /api/v1/life/comment
 // @request life_id
 // @response success, items
 
 exports.getComment = async (req, res, next) => {
-  let life_id = req.body.life_id;
+  let life_id = req.query.life_id;
 
   let query = `select c.*,u.nickname from life_comment as c left join market_user as u on c.user_id = u.id 
                where life_id = ${life_id} order by created_at`;
