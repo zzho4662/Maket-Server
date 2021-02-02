@@ -250,9 +250,10 @@ let query = `select l.*,u.nickname,u.location from neighbor_life as l left join 
 
 exports.getComment = async (req, res, next) => {
   let life_id = req.query.life_id;
+  let order = req.query.order;
 
   let query = `select c.*,u.nickname from life_comment as c left join market_user as u on c.user_id = u.id 
-               where life_id = ${life_id} order by created_at`;
+               where life_id = ${life_id} order by created_at ${order}`;
   console.log(query);
 
   try {
