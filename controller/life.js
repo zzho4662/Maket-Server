@@ -84,10 +84,12 @@ exports.getLifelist = async (req, res, next) => {
 // @response success, items
 
 exports.detailBoard = async(req,res,next) =>{
-  let life_id = req.body.life_id;
+  let life_id = req.query.life_id;
   let user_id = req.user.id;
 
-  let query = `select l.*,u.nickname,(select count(*) from life_interest where life_id = ${life_id} and user_id = ${user_id}) as interest_cnt from neighbor_life as l join market_user as u on l.user_id = u.id where l.id = ${life_id}`;
+  let query = `select l.*,u.nickname,(select count(*) from life_interest where life_id = ${life_id} and user_id = ${user_id}) as interest_cnt,
+               ifnull((select count(life_id) from life_comment where life_id = l.id group by life_id),0) as com_cnt
+               from neighbor_life as l join market_user as u on l.user_id = u.id where l.id = ${life_id}`;
   console.log(query);
   try {
     [rows] = await connection.query(query);
@@ -242,15 +244,16 @@ let query = `select l.*,u.nickname,u.location from neighbor_life as l left join 
 
 
 // @desc 동네 글 댓글 보기
-// @route POST /api/v1/life/comment
+// @route GET /api/v1/life/comment
 // @request life_id
 // @response success, items
 
 exports.getComment = async (req, res, next) => {
-  let life_id = req.body.life_id;
+  let life_id = req.query.life_id;
+  let order = req.query.order;
 
   let query = `select c.*,u.nickname from life_comment as c left join market_user as u on c.user_id = u.id 
-               where life_id = ${life_id} order by created_at`;
+               where life_id = ${life_id} order by created_at ${order}`;
   console.log(query);
 
   try {
