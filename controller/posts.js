@@ -19,14 +19,9 @@ exports.uploadNew = async (req, res, next) => {
 
   let data = [user_id, category, title, content, price];
 
-  // let query1 = `select id, user_id from market where user_id = ${user_id} order by created_at desc limit 1`;
-
-  // console.log(query1);
    try {
     [result] = await connection.query(query, data);
-    //[rows] = await connection.query(query1)
     res.status(200).json({ success: true , items : rows});
-    //market_id = rows[0].id ;
   } catch (e) {
     res.status(500).json({ error: e });
     return;
