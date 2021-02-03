@@ -37,21 +37,21 @@ exports.uploadNew = async (req, res, next) => {
   }
 
   // 이미지
-  if (image.mimetype.startsWith("image") == false) {
+  if (photo.mimetype.startsWith("image") == false) {
     res.stats(400).json({ message: "사진 파일 아닙니다." });
     return;
   }
 
-  if (image.size > process.env.MAX_FILE_SIZE) {
+  if (photo.size > process.env.MAX_FILE_SIZE) {
     res.stats(400).json({ message: "파일 크기가 너무 큽니다." });
     return;
   }
 
-  image.name = `image_${user_id}_${Date.now()}${path.parse(image.name).ext}`;
+  photo.name = `photo_${user_id}_${Date.now()}${path.parse(photo.name).ext}`;
 
-  let fileUploadPath = `${process.env.FILE_UPLOAD_PATH}/${image.name}`;
+  let fileUploadPath = `${process.env.FILE_UPLOAD_PATH}/${photo.name}`;
 
-  image.mv(fileUploadPath, async (err) => {
+  photo.mv(fileUploadPath, async (err) => {
     if (err) {
       console.log(err);
       return;
