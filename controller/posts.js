@@ -19,8 +19,11 @@ exports.uploadNew = async (req, res, next) => {
 
   let data = [user_id, category, title, content, price];
 
+  let query1 = `select * from market`;
+
    try {
     [result] = await connection.query(query, data);
+    [rows] = await connection.query(query1);
     res.status(200).json({ success: true , items : rows});
   } catch (e) {
     res.status(500).json({ error: e });
@@ -71,8 +74,7 @@ try {
 
 let query = `insert into market_image (image , market_id, user_id) values ("${photo.name}", "${market_id}", "${user_id}")`;
 let querySelect = `select m.*, i.image from market as m join market_image as i on m.id = i.market_id where m.id ="${market_id}"`;
-console.log(query);
-console.log(querySelect);
+
 try {
   [result] = await connection.query(query);
   [rows] = await connection.query(querySelect);
