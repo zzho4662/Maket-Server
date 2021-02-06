@@ -24,7 +24,7 @@ exports.uploadNew = async (req, res, next) => {
    try {
     [result] = await connection.query(query, data);
     [rows] = await connection.query(query1);
-    res.status(200).json({ success: true , items : rows});
+    res.status(200).json({ success: true , items : rows, cnt : rows.length});
   } catch (e) {
     res.status(500).json({ error: e });
     return;
