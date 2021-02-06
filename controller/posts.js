@@ -86,3 +86,32 @@ try {
 }
 };
 
+
+// @desc 중고거래 최신글 보여주기
+// @route GET /api/v1/posts
+// @request order
+// @response success, items
+
+exports.getMarketlist = async (req, res, next) => {
+  let order = req.query.order;
+  let offset = req.query.offset;
+  let limit = req.query.limit;
+
+
+  let query = `select m.*,u.nickname from market as m left join market_user as u on m.user_id = u.id 
+               order by created_at ${order} limit ${offset}, ${limit}`;
+  console.log(query);
+
+  try {
+      [rows] = await connection.query(query);
+      res
+          .status(200)
+          .json({success: true, items: rows, cnt: rows.length});
+  } catch (e) {
+      console.log(e);
+      res
+          .status(400)
+          .json({success: false});
+  }
+};
+
