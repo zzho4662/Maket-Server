@@ -19,7 +19,7 @@ exports.uploadNew = async (req, res, next) => {
 
   let data = [user_id, category, title, content, price];
 
-  let query1 = `select * from market`;
+  let query1 = `select m.*, u.nickname from market as m join market_user as u on m.user_id = u.id`;
 
    try {
     [result] = await connection.query(query, data);
