@@ -1,5 +1,8 @@
 const path = require("path");
 const connection = require("../db/mysql_connection");
+const AWS = require('aws-sdk');
+const fs  = require('fs');
+require('dotenv').config({path: __dirname + '\\' + '.env'});
 
 // @desc        중고거래 업로드 하는 API
 // @route       POST /api/v1/posts
@@ -11,7 +14,7 @@ exports.uploadNew = async (req, res, next) => {
   let title = req.body.title;
   let content = req.body.content;
   let price = req.body.price;
-  let market_id;
+
 
   let query =
     "insert into market (user_id, category, title, content, price) \
@@ -114,4 +117,6 @@ exports.getMarketlist = async (req, res, next) => {
           .json({success: false});
   }
 };
+
+
 
