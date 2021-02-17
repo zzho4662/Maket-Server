@@ -252,7 +252,8 @@ exports.getComment = async (req, res, next) => {
   let life_id = req.query.life_id;
   let order = req.query.order;
 
-  let query = `select c.*,u.nickname from life_comment as c left join market_user as u on c.user_id = u.id 
+  let query = `select c.*,u.nickname,(select count(comment_id) from life_com_comment where life_id = l.id group by life_id) as parent_id
+               from life_comment as c left join market_user as u on c.user_id = u.id 
                where life_id = ${life_id} order by created_at ${order}`;
   console.log(query);
 
@@ -376,8 +377,8 @@ exports.deleteComment = async (req, res, next) => {
 
 
 // @desc 동네 글 댓글에 댓글달기
-// @route POST /api/v1/life/comment/upcomment
-// @request user_id(auth), life_id,id,comment
+// @route POST /api/v1/life/comment/comment
+// @request user_id(auth), life_id, comment_id, comment
 // @response success, items
 
 exports.upupComment = async(req,res,next) =>{
@@ -386,10 +387,10 @@ exports.upupComment = async(req,res,next) =>{
     let life_id = req.body.life_id;
     let comment = req.body.comment;
 
-    let query = `insert into life_comment (life_id, comment, user_id) values (${life_id}, "${comment}",${user_id})`;
+    let query = `insert into life_com_comment (life_id, comment_id, comment, user_id) values (${life_id},${comment_id}, "${comment}",${user_id})`;
     console.log(query);
   
-    let qur = `select u.nickname,u.location ,c.* from life_comment as c left join market_user as u on c.user_id = u.id 
+    let qur = `select u.nickname,u.location ,c.* from life_com_comment as c left join market_user as u on c.user_id = u.id 
              where life_id = ${life_id} order by created_at asc`;
     console.log(qur);
     try {
@@ -399,6 +400,26 @@ exports.upupComment = async(req,res,next) =>{
     } catch (e) {
           res.status(500).json({ error: e });
     }
+}
+
+// @desc 동네 글 대댓글 최신순으로 보기
+// @route GET /api/v1/life/comment/comment
+// @request life_id, comment_id
+// @response success, items
+
+exports.getComComment = async(req,res,next) =>{
+  let comment_id= req.query.comment_id;
+  let life_id = req.query.life_id;
+
+  let query = `select u.nickname,u.location ,c.* from life_com_comment as c left join market_user as u on c.user_id = u.id 
+               where life_id = ${life_id} and comment_id = ${comment_id} order by created_at asc`;
+
+  try {
+        [rows] = await connection.query(query);
+        res.status(200).json({ success: true, items: rows, cnt: rows.length });
+  } catch (e) {
+        res.status(500).json({ error: e });
+  }
 }
 
 // @desc 동네 글 관심목록 추가

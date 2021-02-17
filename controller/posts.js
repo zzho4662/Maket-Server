@@ -76,12 +76,12 @@ try {
 }
 
 let query = `insert into market_image (image , market_id, user_id) values ("${photo.name}", "${market_id}", "${user_id}")`;
-let querySelect = `select m.*, i.image from market as m join market_image as i on m.id = i.market_id where m.id ="${market_id}"`;
+// let querySelect = `select m.*, i.image from market as m join market_image as i on m.id = i.market_id where m.id ="${market_id}"`;
 
 try {
   [result] = await connection.query(query);
-  [rows] = await connection.query(querySelect);
-  res.status(200).json({ success: true , items : rows , cnt : rows.length});
+  // [rows] = await connection.query(querySelect);
+  res.status(200).json({ success: true});
 
 } catch (e) {
   res.status(500).json({ error: e });

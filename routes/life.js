@@ -1,6 +1,7 @@
 const express = require("express");
 const auth = require("../middleware/auth");
-const { LifeUpload, getLifelist, updateBoard, deleteBoard, getTitlelist, searchLife,detailBoard, getComment, addComment,updateComment,deleteComment, interestLife, uninterestLife } = require("../controller/life");
+const { LifeUpload, getLifelist, updateBoard, deleteBoard, getTitlelist, searchLife,detailBoard, 
+        getComment, addComment,updateComment,deleteComment, interestLife, uninterestLife,upupComment, getComComment } = require("../controller/life");
 
 const router = express.Router();
 
@@ -17,4 +18,6 @@ router.route("/upcomment").post(auth,updateComment);
 router.route("/delcomment").delete(auth,deleteComment);
 router.route("/interest").post(auth,interestLife);
 router.route("/interest/delete").delete(auth,uninterestLife);
+router.route("/comment/comment").post(auth,upupComment);
+router.route("/comment/comment").get(getComComment);
 module.exports = router;
