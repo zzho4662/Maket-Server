@@ -57,14 +57,46 @@ if (photo.size > process.env.MAX_FILE_SIZE) {
 
 photo.name = `photo_${user_id}_${Date.now()}${path.parse(photo.name).ext}`;
 
-let fileUploadPath = `${process.env.FILE_UPLOAD_PATH}/${photo.name}`;
+// S3에 올릴 때는 필요없어지는 부분
+  // let fileUploadPath = `${process.env.FILE_UPLOAD_PATH}/${photo.name}`;
 
-photo.mv(fileUploadPath, async (err) => {
-  if (err) {
-    console.log(err);
-    return;
-  }
-});
+  // photo.mv(fileUploadPath, async (err) => {
+  //   if (err) {
+  //     console.log(err);
+  //     return;
+  //   }
+  // });
+
+  // S3에 올릴 때 필요한 부분
+  // 1. S3 의 버킷 이름과 aws 의 credential.csv 파일의 정보를 셋팅한다.
+  let file = photo.data;
+
+  AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: `ap-northeast-2`
+  });
+
+  // 2. S3에 파일 업로드를 위한 파라미터를 설정한다.
+  // S3를 퍼블릭으로 설정해야 읽어올 수 있다.
+  const s3 = new AWS.S3();
+  let params = {
+    Bucket: process.env.S3_BUCKET,
+    Key: photo.name,
+    Body: file,
+    ContentType: path.parse(photo.name).ext.split(".")[1],
+    ACL: "public-read",
+  };
+
+  // S3에 파일을 업로드 하고, 성공하면 디비에 파일명 저장한다.
+  s3.upload(params, async function (err, s3Data) {
+    
+    if(err){
+      console.log(err);
+    }else{
+      console.log(s3Data);
+    }
+    // err이 null이면 업로드에 성공한 것
 
 let query1 = `select id, user_id from market where user_id = "${user_id}" order by created_at desc limit 1`;
 console.log(query1);
@@ -75,6 +107,7 @@ try {
   res.status(500).json({ error: e });
   return;
 }
+  
 
 let query = `insert into market_image (image , market_id, user_id) values ("${photo.name}", "${market_id}", "${user_id}")`;
 let querySelect = `select m.*, i.image from market as m join market_image as i on m.id = i.market_id where m.id ="${market_id}"`;
@@ -88,8 +121,9 @@ try {
   res.status(500).json({ error: e });
   return;
 }
-};
+});
 
+ };
 
 // @desc 중고거래 최신글 보여주기
 // @route GET /api/v1/posts

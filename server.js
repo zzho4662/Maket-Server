@@ -24,4 +24,8 @@ app.use("/api/v1/favorite",favorite);
 
 const PORT = process.env.PORT || 6200;
 
+app.get("/", (req,res,next) =>{
+    res.json({success : true})
+});
+
 app.listen(PORT, console.log("6200"));
