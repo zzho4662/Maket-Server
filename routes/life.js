@@ -17,4 +17,7 @@ router.route("/upcomment").post(auth,updateComment);
 router.route("/delcomment").delete(auth,deleteComment);
 router.route("/interest").post(auth,interestLife);
 router.route("/interest/delete").delete(auth,uninterestLife);
+router.route("/mylife").get(auth,mylife);
+router.route("/mylife/comment").get(auth,mylifecomment);
+router.route("/interestlife").get(auth,myinterestlife);
 module.exports = router;
