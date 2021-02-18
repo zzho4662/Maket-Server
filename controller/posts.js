@@ -4,8 +4,6 @@ var AWS = require('aws-sdk');
 var fs = require('fs');
 require('dotenv').config({path: __dirname + '\\' + '.env'});
 
-
-
 //
 // @desc        중고거래 업로드 하는 API
 // @route       POST /api/v1/posts

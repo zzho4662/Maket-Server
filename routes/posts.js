@@ -8,7 +8,7 @@ const {
 
 const router = express.Router();
 
-router.route("/image").put(auth, uploadImage);
+router.route("/image").post(auth, uploadImage);
 router.route("/").post(auth, uploadNew);
 router.route("/").get(getMarketlist)
 
