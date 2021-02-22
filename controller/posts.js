@@ -133,7 +133,8 @@ exports.getMarketlist = async (req, res, next) => {
   let offset = req.query.offset;
   let limit = req.query.limit;
 
-  let query = `select m.*, u.nickname from market as m left join market_user as u on m.user_id = u.id 
+  let query = `select m.*, u.nickname, (select image from market_image where market_id = m.id limit 1) as thumbnail 
+               from market as m left join market_user as u on m.user_id = u.id 
                order by created_at ${order} limit ${offset}, ${limit}`;
 
   console.log(query);
@@ -151,34 +152,34 @@ exports.getMarketlist = async (req, res, next) => {
   }
 };
 
-// @desc 중고거래 썸네일 가져오기
-// @route GET /api/v1/posts/thumbnail
-// @request 
-// @response success, items
+// // @desc 중고거래 썸네일 가져오기
+// // @route GET /api/v1/posts/thumbnail
+// // @request 
+// // @response success, items
 
-exports.getThumbnail = async (req, res, next) => {
+// exports.getThumbnail = async (req, res, next) => {
 
-  let query1 = `select m.id from market as m order by created_at `
+//   let query1 = `select m.id from market as m order by created_at `
 
-  try {
-      [rows] = await connection.query(query1);
-      market_id = rows[0].id;
-  } catch (e) {
-    res.status(500).json({ error: e });
-    return;
-  }
+//   try {
+//       [rows] = await connection.query(query1);
+//       market_id = rows[0].id;
+//   } catch (e) {
+//     res.status(500).json({ error: e });
+//     return;
+//   }
 
-  let query = `select id, image from market_image where market_id = ${market_id} order by id asc limit 1`
-  console.log(query);
-  try {
-    [rows] = await connection.query(query);
-    res.status(200).json({ success: true , items : rows , cnt : rows.length});
+//   let query = `select id, image from market_image where market_id = ${market_id} order by id asc limit 1`
+//   console.log(query);
+//   try {
+//     [rows] = await connection.query(query);
+//     res.status(200).json({ success: true , items : rows , cnt : rows.length});
   
-  } catch (e) {
-    res.status(500).json({ error: e });
-    return;
-  }
-};
+//   } catch (e) {
+//     res.status(500).json({ error: e });
+//     return;
+//   }
+// };
 
 
 
