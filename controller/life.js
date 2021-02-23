@@ -474,4 +474,73 @@ exports.uninterestLife = async(req,res,next) =>{
   } catch (e) {
     res.status(500).json({ error: e });
   }
-}
+};
+
+// @desc 동네 글 중 내가 쓴 글만 보여주기
+// @route GET /api/v1/life/mylife
+// @request user_id(auth)
+// @response success, items
+
+exports.mylife = async(req,res,next) =>{
+  let user_id = req.user.id;
+
+  let query = `select * from neighbor_life where user_id = ${user_id} order by created_at desc;`;
+
+  console.log(query);
+
+  try {
+    [rows] = await connection.query(query);
+    res.status(200).json({ success: true, items: rows, cnt : rows.length });
+  } catch (e) {
+    res.status(500).json({ error: e });
+  }
+};
+
+// @desc 동네 글 중 내가 쓴 댓글만 쓴 글 보여주기
+// @route GET /api/v1/life/mylife/comment
+// @request user_id(auth)
+// @response success, items
+
+exports.mylifecomment = async(req,res,next) =>{
+  let user_id = req.user.id;
+
+  let query = `select n.content,c.* from neighbor_life as n join life_comment as c on n.id = c.life_id where c.user_id = ${user_id}
+               union
+               select n.content,cc.id as id ,cc.user_id as user_id, cc.life_id as life_id, cc.comment as comment, cc.created_at as created_at 
+               from neighbor_life as n join life_com_comment as cc on n.id = cc.life_id where cc.user_id = ${user_id}`;
+
+  console.log(query);
+
+  try {
+    [rows] = await connection.query(query);
+    res.status(200).json({ success: true, items: rows, cnt : rows.length });
+  } catch (e) {
+    res.status(500).json({ error: e });
+  }
+};
+
+
+// @desc 관심목록 추가한 동네 글만 가져오기
+// @route GET /api/v1/life/interestlife
+// @request user_id(auth)
+// @response success, items
+
+exports.myinterestlife = async(req,res,next) =>{
+  let offset = req.query.offset;
+  let limit = req.query.limit;
+  let user_id = req.user.id;
+
+  let query = `select l.*,u.nickname, ifnull((select count(life_id) from life_interest where life_id = l.id and user_id = ${user_id} group by life_id),0) as interest_cnt, 
+  ifnull((select count(life_id) from life_comment where life_id = l.id group by life_id),0) as com_cnt
+  from neighbor_life as l left join market_user as u on l.user_id = u.id 
+  where ifnull((select count(life_id) from life_interest where life_id = l.id and user_id = 16 group by life_id),0) = 1 order by created_at desc limit ${offset} , ${limit};`;
+
+  console.log(query);
+
+  try {
+    [rows] = await connection.query(query);
+    res.status(200).json({ success: true, items: rows, cnt : rows.length });
+  } catch (e) {
+    res.status(500).json({ error: e });
+  }
+};

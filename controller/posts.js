@@ -152,5 +152,3 @@ exports.getMarketlist = async (req, res, next) => {
           .json({success: false});
   }
 };
-
-
