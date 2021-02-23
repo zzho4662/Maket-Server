@@ -484,7 +484,8 @@ exports.uninterestLife = async(req,res,next) =>{
 exports.mylife = async(req,res,next) =>{
   let user_id = req.user.id;
 
-  let query = `select * from neighbor_life where user_id = ${user_id} order by created_at desc;`;
+  let query = `select l.*, ifnull((select count(life_id) from life_comment where life_id = l.id group by life_id),0) as com_cnt
+               from neighbor_life as l where user_id = ${user_id} order by created_at desc`;
 
   console.log(query);
 
