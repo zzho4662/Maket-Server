@@ -16,7 +16,6 @@ exports.uploadNew = async (req, res, next) => {
   let content = req.body.content;
   let price = req.body.price;
 
-
   let query =
     "insert into market (user_id, category, title, content, price) \
                 values (?,?,?,?,?)";
@@ -110,7 +109,7 @@ photo.name = `photo_${user_id}_${Date.now()}${path.parse(photo.name).ext}`;
       
     
     let query = `insert into market_image (image , market_id, user_id) values ("${photo.name}", "${market_id}", "${user_id}")`;
-    let querySelect = `select m.*, i.image from market as m join market_image as i on m.id = i.market_id where m.id ="${market_id}"`;
+    let querySelect = `select m.*, i.image as thumbnail from market as m join market_image as i on m.id = i.market_id where m.id ="${market_id}"`;
     
     try {
       [result] = await connection.query(query);
@@ -135,9 +134,10 @@ exports.getMarketlist = async (req, res, next) => {
   let offset = req.query.offset;
   let limit = req.query.limit;
 
-
-  let query = `select m.*,u.nickname from market as m left join market_user as u on m.user_id = u.id 
+  let query = `select m.*, u.nickname, (select image from market_image where market_id = m.id order by image limit 1) as thumbnail 
+               from market as m left join market_user as u on m.user_id = u.id 
                order by created_at ${order} limit ${offset}, ${limit}`;
+
   console.log(query);
 
   try {
@@ -152,3 +152,32 @@ exports.getMarketlist = async (req, res, next) => {
           .json({success: false});
   }
 };
+
+// // @desc 중고거래 썸네일 가져오기
+// // @route GET /api/v1/posts/thumbnail
+// // @request 
+// // @response success, items
+
+// exports.getThumbnail = async (req, res, next) => {
+
+//   let query1 = `select m.id from market as m order by created_at `
+
+//   try {
+//       [rows] = await connection.query(query1);
+//       market_id = rows[0].id;
+//   } catch (e) {
+//     res.status(500).json({ error: e });
+//     return;
+//   }
+
+//   let query = `select id, image from market_image where market_id = ${market_id} order by id asc limit 1`
+//   console.log(query);
+//   try {
+//     [rows] = await connection.query(query);
+//     res.status(200).json({ success: true , items : rows , cnt : rows.length});
+  
+//   } catch (e) {
+//     res.status(500).json({ error: e });
+//     return;
+//   }
+// };
