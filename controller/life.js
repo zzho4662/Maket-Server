@@ -252,8 +252,8 @@ exports.getComment = async (req, res, next) => {
   let life_id = req.query.life_id;
   let order = req.query.order;
 
-  let query = `select c.*,u.nickname,(select count(comment_id) from life_com_comment where life_id = l.id group by life_id) as parent_id
-               from life_comment as c left join market_user as u on c.user_id = u.id 
+  let query = `select c.*,u.nickname, (select exists(select * from life_com_comment where comment_id = c.id)) as parent_id
+               from life_comment as c left join market_user as u on c.user_id = u.id
                where life_id = ${life_id} order by created_at ${order}`;
   console.log(query);
 
