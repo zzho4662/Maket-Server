@@ -504,9 +504,10 @@ exports.mylife = async(req,res,next) =>{
 exports.mylifecomment = async(req,res,next) =>{
   let user_id = req.user.id;
 
-  let query = `select n.content,c.* from neighbor_life as n join life_comment as c on n.id = c.life_id where c.user_id = ${user_id}
+  let query = `select n.content,c.id as comment_id, null as com_comment_id, c.user_id as user_id, c.life_id as id, c.comment as comment, c.created_at as created_at 
+               from neighbor_life as n join life_comment as c on n.id = c.life_id where c.user_id = ${user_id}
                union
-               select n.content,cc.id as id ,cc.user_id as user_id, cc.life_id as life_id, cc.comment as comment, cc.created_at as created_at 
+               select n.content, null as comment_id, cc.id as com_comment_id, cc.user_id as user_id, cc.life_id as id, cc.comment as comment, cc.created_at as created_at 
                from neighbor_life as n join life_com_comment as cc on n.id = cc.life_id where cc.user_id = ${user_id}`;
 
   console.log(query);
