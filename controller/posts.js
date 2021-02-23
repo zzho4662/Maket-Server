@@ -133,7 +133,7 @@ exports.getMarketlist = async (req, res, next) => {
   let offset = req.query.offset;
   let limit = req.query.limit;
 
-  let query = `select m.*, u.nickname, (select image from market_image where market_id = m.id limit 1) as thumbnail 
+  let query = `select m.*, u.nickname, (select image from market_image where market_id = m.id order by image limit 1) as thumbnail 
                from market as m left join market_user as u on m.user_id = u.id 
                order by created_at ${order} limit ${offset}, ${limit}`;
 
