@@ -152,32 +152,3 @@ exports.getMarketlist = async (req, res, next) => {
           .json({success: false});
   }
 };
-
-// // @desc 중고거래 썸네일 가져오기
-// // @route GET /api/v1/posts/thumbnail
-// // @request 
-// // @response success, items
-
-// exports.getThumbnail = async (req, res, next) => {
-
-//   let query1 = `select m.id from market as m order by created_at `
-
-//   try {
-//       [rows] = await connection.query(query1);
-//       market_id = rows[0].id;
-//   } catch (e) {
-//     res.status(500).json({ error: e });
-//     return;
-//   }
-
-//   let query = `select id, image from market_image where market_id = ${market_id} order by id asc limit 1`
-//   console.log(query);
-//   try {
-//     [rows] = await connection.query(query);
-//     res.status(200).json({ success: true , items : rows , cnt : rows.length});
-  
-//   } catch (e) {
-//     res.status(500).json({ error: e });
-//     return;
-//   }
-// };
