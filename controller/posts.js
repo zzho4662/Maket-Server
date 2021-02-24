@@ -164,6 +164,7 @@ exports.detailMarket = async (req, res, next) => {
 
   try {
     [rows] = await connection.query(query);
+    //
     // [rows1] = await connection.query(query1);
     //imageTree : rows1 ,
     res
