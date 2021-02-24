@@ -114,7 +114,7 @@ photo.name = `photo_${user_id}_${Date.now()}${path.parse(photo.name).ext}`;
     try {
       [result] = await connection.query(query);
       [rows] = await connection.query(querySelect);
-      res.status(200).json({ success: true , items : rows , cnt : rows.length});
+      res.status(200).json({ success: true , items : rows ,  cnt : rows.length});
     
     } catch (e) {
       res.status(500).json({ error: e });
@@ -137,7 +137,6 @@ exports.getMarketlist = async (req, res, next) => {
   let query = `select m.*, u.nickname, (select image from market_image where market_id = m.id order by image limit 1) as thumbnail 
                from market as m left join market_user as u on m.user_id = u.id 
                order by created_at ${order} limit ${offset}, ${limit}`;
-
   console.log(query);
 
   try {
@@ -150,5 +149,30 @@ exports.getMarketlist = async (req, res, next) => {
       res
           .status(400)
           .json({success: false});
+  }
+};
+
+// @desc 중고거래 글 상세보기
+// @route GET /api/v1/posts/detail
+// @request market_id
+// @response success, items, imgeTree
+
+exports.detailMarket = async (req, res, next) => {
+  let market_id = req.query.market_id;
+  let query = `select m.*, u.nickname from market as m left join market_user as u on m.user_id = u.id where m.id = ${market_id}`
+  let query1 = `select image from market_image where market_id = ${market_id}`
+
+  try {
+    [rows] = await connection.query(query);
+    [rows1] = await connection.query(query1);
+  
+    res
+        .status(200)
+        .json({success: true, items: rows, imageTree : rows1 ,cnt: rows.length});
+  } catch (e) {
+    console.log(e);
+    res
+        .status(400)
+        .json({success: false});
   }
 };
