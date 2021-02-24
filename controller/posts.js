@@ -134,7 +134,8 @@ exports.getMarketlist = async (req, res, next) => {
   let offset = req.query.offset;
   let limit = req.query.limit;
 
-  let query = `select m.*, u.nickname, (select image from market_image where market_id = m.id order by image limit 1) as thumbnail 
+  let query = `select m.*, u.nickname, ifnull((select count(market_id) from market_like where market_id = m.id and user_id = ${user_id} group by market_id),0) as interest_cnt, 
+              (select image from market_image where market_id = m.id order by image limit 1) as thumbnail 
                from market as m left join market_user as u on m.user_id = u.id 
                order by created_at ${order} limit ${offset}, ${limit}`;
   console.log(query);
@@ -159,9 +160,12 @@ exports.getMarketlist = async (req, res, next) => {
 
 exports.detailMarket = async (req, res, next) => {
   let market_id = req.query.market_id;
-  let query = `select m.*, u.nickname from market as m left join market_user as u on m.user_id = u.id where m.id = ${market_id}`
+  let user_id = req.user.id;
+  let query = `select m.*, u.nickname,ifnull((select count(market_id) from market_like where market_id = m.id and user_id = ${user_id} group by market_id),0) as interest_cnt 
+               from market as m left join market_user as u on m.user_id = u.id where m.id = ${market_id}`
   let query1 = `select image from market_image where market_id = ${market_id}`
 
+  console.log(query);
   try {
     [rows] = await connection.query(query);
     [rows1] = await connection.query(query1);
