@@ -133,6 +133,7 @@ exports.getMarketlist = async (req, res, next) => {
   let order = req.query.order;
   let offset = req.query.offset;
   let limit = req.query.limit;
+  let user_id = req.user.id;
 
   let query = `select m.*, u.nickname, ifnull((select count(market_id) from market_like where market_id = m.id and user_id = ${user_id} group by market_id),0) as interest_cnt, 
               (select image from market_image where market_id = m.id order by image limit 1) as thumbnail 
