@@ -168,7 +168,7 @@ exports.detailMarket = async (req, res, next) => {
   
     res
         .status(200)
-        .json({success: true, items: rows, imageTree : rows1 ,cnt: rows.length});
+        .json({success: true, items: rows, imageTree : rows1 ,cnt: rows1.length});
   } catch (e) {
     console.log(e);
     res
