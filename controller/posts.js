@@ -164,10 +164,11 @@ exports.detailMarket = async (req, res, next) => {
 
   try {
     [rows] = await connection.query(query);
-    [rows1] = await connection.query(query1);
+    // [rows1] = await connection.query(query1);
+    //imageTree : rows1 ,
     res
         .status(200)
-        .json({success: true, items: rows, imageTree : rows1 ,cnt: rows.length});
+        .json({success: true, items: rows, cnt: rows.length});
   } catch (e) {
     console.log(e);
     res
