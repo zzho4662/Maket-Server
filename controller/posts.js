@@ -162,7 +162,25 @@ exports.getMarketlist = async (req, res, next) => {
 exports.detailMarket = async (req, res, next) => {
   let market_id = req.query.market_id;
   let user_id = req.user.id;
-  let query = `select m.*, u.nickname, u.location, ifnull((select count(market_id) from market_like where market_id = m.id and user_id = ${user_id} group by market_id),0) as interest_cnt 
+
+  let query = ` insert into market_boardview(market_id, user_id, boardview)
+                values(${market_id}, ${user_id}, now())
+                ON DUPLICATE KEY UPDATE boardview = now()`;
+
+  try {
+    if (!user_id) {
+      user_id = 0;
+                  }
+      [rows] = await connection.query(query);
+    } catch (e) {
+      console.log(e);
+      res.status(500).json();
+      return;
+  }
+
+
+  query = `select m.*, u.nickname, u.location, (select count(*) from market_boardview where market_id =${market_id}) as view_cnt , 
+           ifnull((select count(market_id) from market_like where market_id = m.id and user_id = ${user_id} group by market_id),0) as interest_cnt 
                from market as m left join market_user as u on m.user_id = u.id where m.id = ${market_id}`
   let query1 = `select image from market_image where market_id = ${market_id}`
 
