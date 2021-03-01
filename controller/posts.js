@@ -181,3 +181,84 @@ exports.detailMarket = async (req, res, next) => {
         .json({success: false});
   }
 };
+
+
+// @desc 중고거래 관심목록 추가
+// @route POST /api/v1/posts/interest
+// @request user_id(auth), market_id
+// @response success, items
+
+exports.interestMarket = async(req,res,next) =>{
+  let user_id = req.user.id;
+  let market_id = req.body.market_id;
+
+  let query = `insert into market_like (market_id, user_id) values (${market_id} , ${user_id})`;
+  let qur = `select * , (select count(*) from market_like where user_id = ${user_id} and market_id = ${market_id})as interest_cnt 
+             from market where id = ${market_id};`;
+
+  console.log(query);
+  console.log(qur);
+
+  try {
+    [result] = await connection.query(query);
+    [rows] = await connection.query(qur);
+    res.status(200).json({ success: true, items: rows });
+  } catch (e) {
+    if (e.errno == 1062) {
+      res.status(500).json({ message: "이미 즐겨찾기에 추가되었습니다." });
+    } else {
+      res.status(500).json({ error: e });
+    }
+  }
+};
+
+// @desc 중고거래 관심목록 제외
+// @route DELETE /api/v1/posts/interest
+// @request user_id(auth), life_id
+// @response success, items
+
+exports.uninterestMarket = async(req,res,next) =>{
+  let user_id = req.user.id;
+  let market_id = req.body.market_id;
+
+  let query = `delete from market_like where user_id = ${user_id} and market_id = ${market_id}`;
+  let qur = `select * , (select count(*) from market_like where user_id = ${user_id} and market_id = ${market_id})as interest_cnt 
+             from market where id = ${market_id};`;
+
+  console.log(query);
+  console.log(qur);
+
+  try {
+    [result] = await connection.query(query);
+    [rows] = await connection.query(qur);
+    res.status(200).json({ success: true, items: rows });
+  } catch (e) {
+    res.status(500).json({ error: e });
+  }
+};
+
+
+// @desc 관심목록 추가한 중고 글만 가져오기
+// @route GET /api/v1/posts/myinterestMarket
+// @request user_id(auth)
+// @response success, items
+
+exports.myinterestMarket = async(req,res,next) =>{
+  let offset = req.query.offset;
+  let limit = req.query.limit;
+  let user_id = req.user.id;
+
+  let query = `select m.*,u.nickname, ifnull((select count(market_id) from market_like where market_id = m.id and user_id = ${user_id} group by market_id),0) as interest_cnt, 
+  ifnull((select count(market_id) from market_comment where market_id = m.id group by market_id),0) as com_cnt
+  from market as m left join market_user as u on m.user_id = u.id 
+  where ifnull((select count(market_id) from market_like where market_id = m.id and user_id = ${user_id} group by market_id),0) = 1 order by created_at desc limit ${offset}, ${limit}`
+
+  console.log(query);
+
+  try {
+    [rows] = await connection.query(query);
+    res.status(200).json({ success: true, items: rows, cnt : rows.length });
+  } catch (e) {
+    res.status(500).json({ error: e });
+  }
+};
