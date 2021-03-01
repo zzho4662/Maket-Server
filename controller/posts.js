@@ -265,7 +265,6 @@ exports.myinterestMarket = async(req,res,next) =>{
   let offset = req.query.offset;
   let limit = req.query.limit;
   let user_id = req.user.id;
-  let market_id = req.query.market_id;
 
   let query = `select m.*,u.nickname, ifnull((select count(market_id) from market_like where market_id = m.id and user_id = ${user_id} group by market_id),0) as interest_cnt, 
   ifnull((select count(market_id) from market_comment where market_id = m.id group by market_id),0) as com_cnt,
