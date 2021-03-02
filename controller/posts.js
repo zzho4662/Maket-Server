@@ -268,7 +268,8 @@ exports.myinterestMarket = async(req,res,next) =>{
 
   let query = `select m.*,u.nickname, ifnull((select count(market_id) from market_like where market_id = m.id and user_id = ${user_id} group by market_id),0) as interest_cnt, 
   ifnull((select count(market_id) from market_comment where market_id = m.id group by market_id),0) as com_cnt,
-  (select count(*) from market_like as ml where ml.market_id = m.id) as like_cnt
+  (select count(*) from market_like as ml where ml.market_id = m.id) as like_cnt, 
+  (select image from market_image where market_id = m.id order by image limit 1) as thumbnail 
   from market as m left join market_user as u on m.user_id = u.id 
   where ifnull((select count(market_id) from market_like where market_id = m.id and user_id = ${user_id} group by market_id),0) = 1 order by created_at desc limit ${offset}, ${limit}`
 
