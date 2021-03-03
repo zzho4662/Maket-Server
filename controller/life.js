@@ -532,7 +532,7 @@ exports.myinterestlife = async(req,res,next) =>{
   let limit = req.query.limit;
   let user_id = req.user.id;
 
-  let query = `select l.*,u.nickname, ifnull((select count(life_id) from life_interest where life_id = l.id and user_id = ${user_id} group by life_id),0) as interest_cnt, 
+  let query = `select l.*,u.nickname,u.location, ifnull((select count(life_id) from life_interest where life_id = l.id and user_id = ${user_id} group by life_id),0) as interest_cnt, 
   ifnull((select count(life_id) from life_comment where life_id = l.id group by life_id),0) as com_cnt
   from neighbor_life as l left join market_user as u on l.user_id = u.id 
   where ifnull((select count(life_id) from life_interest where life_id = l.id and user_id = ${user_id} group by life_id),0) = 1 order by created_at desc limit ${offset} , ${limit};`;
